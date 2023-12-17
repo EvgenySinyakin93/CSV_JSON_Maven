@@ -33,8 +33,8 @@ public class Main {
             CsvToBean<Employee> csv = new CsvToBeanBuilder<Employee>(reader)
                     .withMappingStrategy(strategy)
                     .build();
-            List<Employee> list2 = csv.parse();
-            list2.forEach(System.out::println);
+            List<Employee> list = csv.parse();
+            return list;
         } catch (IOException ex) {
             ex.printStackTrace();
         }
