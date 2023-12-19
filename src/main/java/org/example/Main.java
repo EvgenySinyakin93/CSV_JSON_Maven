@@ -9,7 +9,16 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,17 +52,47 @@ public class Main {
 
     //    Полученный список преобразуйте в строчку в формате JSON
     private static List<Employee> jsonToList(String json) {
-        List<Employee> list3 = new ArrayList<>();
+        List<Employee> list2 = new ArrayList<>();
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
         try {
             Object obj = new JSONParser().parse(json);
             JSONArray array = (JSONArray) obj;
             for (Object a : array) {
-                list3.add(gson.fromJson(a.toString(), Employee.class));
+                list2.add(gson.fromJson(a.toString(), Employee.class));
             }
         } catch (ParseException e) {
             e.printStackTrace();
+        }
+        return list2;
+    }
+
+    private static List<Employee> parseXML(String fileName) throws IOException, SAXException, ParserConfigurationException {
+        List<Employee> list3 = parseXML("data.xml");
+
+//        необходимо получить экземпляр класса Document с использованием DocumentBuilderFactory и DocumentBuilder через метод parse()
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document doc = builder.parse(new File("company.xml"));
+
+//        получите из объекта Document корневой узел Node
+        Node root = doc.getDocumentElement();
+        System.out.println("Корневой элемент: " + root.getNodeName());
+
+//        Получить список дочерних узлов можно при помощи метода getChildNodes():
+        NodeList nodeList = root.getChildNodes();
+
+//        Пройдитесь по списку узлов и получите из каждого из них Element
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            System.out.println("Teкyщий элeмeнт: " + node.getNodeName());
+
+            //Проверяем, что текущий узел элемент
+            if (node.ELEMENT_NODE == node.getNodeType()){
+                Element element = (Element) node;
+                //Проверяем имеет ли элемент id
+
+            }
         }
         return list3;
     }
