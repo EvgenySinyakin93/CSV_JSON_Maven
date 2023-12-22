@@ -26,6 +26,7 @@ import java.util.List;
 
 
 public class Main {
+
     //    Инфо о сотрудниках
     public static void main(String[] args) {
         String[] columnMapping = {"id", "firstName", "lastName", "country", "age"};
@@ -68,12 +69,12 @@ public class Main {
     }
 
     private static List<Employee> parseXML(String fileName) throws IOException, SAXException, ParserConfigurationException {
-        List<Employee> list3 = parseXML("data.xml");
+        List<Employee> staff = parseXML("data.xml");
 
 //        необходимо получить экземпляр класса Document с использованием DocumentBuilderFactory и DocumentBuilder через метод parse()
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
-        Document doc = builder.parse(new File("company.xml"));
+        Document doc = builder.parse(fileName);
 
 //        получите из объекта Document корневой узел Node
         Node root = doc.getDocumentElement();
@@ -91,9 +92,16 @@ public class Main {
             if (node.ELEMENT_NODE == node.getNodeType()){
                 Element element = (Element) node;
                 //Проверяем имеет ли элемент id
+                long id = Integer.parseInt(element.getElementsByTagName("id").item(0).getTextContent());
+                String firstName = element.getElementsByTagName("firstName").item(0).getTextContent();
+                String lastName = element.getElementsByTagName("lastName").item(0).getTextContent();
+                String country = element.getElementsByTagName("country").item(0).getTextContent();
+                int age = Integer.parseInt(element.getElementsByTagName("age").item(0).getTextContent());
 
+                Employee employee = new Employee(id,firstName,lastName,country,age);
+                staff.add(employee);
             }
         }
-        return list3;
+        return staff;
     }
 }
