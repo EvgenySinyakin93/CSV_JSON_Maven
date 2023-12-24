@@ -2,6 +2,7 @@ package org.example;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.CsvToBean;
@@ -20,53 +21,63 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.nio.file.Files.writeString;
+import static jdk.internal.org.jline.utils.InfoCmp.Capability.columns;
 
 
 public class Main {
 
     //    Инфо о сотрудниках
-    public static void main(String[] args) {
+    public static void main(String[] args)   {
         String[] columnMapping = {"id", "firstName", "lastName", "country", "age"};
         String fileName = "data.csv";
         List<Employee> list = parseCSV(columnMapping, fileName);
+        String json = listToJson(list).toString();
+        String fileNameToJSON = "data.json";
+        writeString(json, fileNameToJSON);
     }
 
     //    Далее получите список сотрудников, вызвав метод parseCSV():
-    private static List<Employee> parseCSV(String[] columnMapping, String fileName) {
+    public static List<Employee> parseCSV(String[] columns, String fileName) {
+        List<Employee> result = new ArrayList<>();
+        ColumnPositionMappingStrategy<Employee> strategy = new ColumnPositionMappingStrategy<>();
+        strategy.setType(Employee.class);
+        strategy.setColumnMapping(columns);
         try (CSVReader reader = new CSVReader(new FileReader(fileName))) {
-            ColumnPositionMappingStrategy<Employee> strategy = new ColumnPositionMappingStrategy<>();
-            strategy.setType(Employee.class);
-            strategy.setColumnMapping(columnMapping);
             CsvToBean<Employee> csv = new CsvToBeanBuilder<Employee>(reader)
                     .withMappingStrategy(strategy)
                     .build();
-            List<Employee> list = csv.parse();
-            return list;
-        } catch (IOException ex) {
-            ex.printStackTrace();
+            result = csv.parse();
+            } catch (IOException /*| CsvValidationException*/ e) {
+                e.printStackTrace();
+            }
+            return result;
         }
-        return null;
-    }
 
     //    Полученный список преобразуйте в строчку в формате JSON
-    private static List<Employee> jsonToList(String json) {
-        List<Employee> list2 = new ArrayList<>();
+    private static String listToJson(List<Employee> list) {
         GsonBuilder builder = new GsonBuilder();
-        Gson gson = builder.create();
-        try {
-            Object obj = new JSONParser().parse(json);
-            JSONArray array = (JSONArray) obj;
-            for (Object a : array) {
-                list2.add(gson.fromJson(a.toString(), Employee.class));
-            }
-        } catch (ParseException e) {
+        Gson gson = builder.setPrettyPrinting().create();
+        Type listType = new TypeToken<List<Employee>>() {
+        }.getType();
+        return gson.toJson(list, listType);
+    }
+
+    private static void writeString(String json, String fileName) {
+        try (FileWriter file = new FileWriter(fileName)) {
+            file.write(json);
+            file.flush();
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        return list2;
     }
+
 
     private static List<Employee> parseXML(String fileName) throws IOException, SAXException, ParserConfigurationException {
         List<Employee> staff = parseXML("data.xml");
@@ -100,6 +111,9 @@ public class Main {
 
                 Employee employee = new Employee(id,firstName,lastName,country,age);
                 staff.add(employee);
+                String json = listToJson(staff).toString();
+                String fileNameToJSON = "data2.json";
+                writeString(json, fileNameToJSON);
             }
         }
         return staff;
