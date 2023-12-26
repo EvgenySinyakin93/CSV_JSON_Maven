@@ -34,13 +34,18 @@ import static jdk.internal.org.jline.utils.InfoCmp.Capability.columns;
 public class Main {
 
     //    Инфо о сотрудниках
-    public static void main(String[] args)   {
+    public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
         String[] columnMapping = {"id", "firstName", "lastName", "country", "age"};
         String fileName = "data.csv";
         List<Employee> list = parseCSV(columnMapping, fileName);
         String json = listToJson(list).toString();
         String fileNameToJSON = "data.json";
         writeString(json, fileNameToJSON);
+
+        List<Employee> list2 = parseXML("data.xml");
+        String json2 = listToJson(list2).toString();
+        String fileNameToJSON2 = "data2.json";
+        writeString(json2, fileNameToJSON2);
     }
 
     //    Далее получите список сотрудников, вызвав метод parseCSV():
@@ -54,11 +59,11 @@ public class Main {
                     .withMappingStrategy(strategy)
                     .build();
             result = csv.parse();
-            } catch (IOException /*| CsvValidationException*/ e) {
-                e.printStackTrace();
-            }
-            return result;
+        } catch (IOException /*| CsvValidationException*/ e) {
+            e.printStackTrace();
         }
+        return result;
+    }
 
     //    Полученный список преобразуйте в строчку в формате JSON
     private static String listToJson(List<Employee> list) {
@@ -80,7 +85,7 @@ public class Main {
 
 
     private static List<Employee> parseXML(String fileName) throws IOException, SAXException, ParserConfigurationException {
-        List<Employee> staff = parseXML("data.xml");
+        List<Employee> staff = new ArrayList<>();
 
 //        необходимо получить экземпляр класса Document с использованием DocumentBuilderFactory и DocumentBuilder через метод parse()
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -95,12 +100,13 @@ public class Main {
         NodeList nodeList = root.getChildNodes();
 
 //        Пройдитесь по списку узлов и получите из каждого из них Element
+
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
             System.out.println("Teкyщий элeмeнт: " + node.getNodeName());
 
             //Проверяем, что текущий узел элемент
-            if (node.ELEMENT_NODE == node.getNodeType()){
+            if (node.ELEMENT_NODE == node.getNodeType()) {
                 Element element = (Element) node;
                 //Проверяем имеет ли элемент id
                 long id = Integer.parseInt(element.getElementsByTagName("id").item(0).getTextContent());
@@ -109,7 +115,7 @@ public class Main {
                 String country = element.getElementsByTagName("country").item(0).getTextContent();
                 int age = Integer.parseInt(element.getElementsByTagName("age").item(0).getTextContent());
 
-                Employee employee = new Employee(id,firstName,lastName,country,age);
+                Employee employee = new Employee(id, firstName, lastName, country, age);
                 staff.add(employee);
                 String json = listToJson(staff).toString();
                 String fileNameToJSON = "data2.json";
