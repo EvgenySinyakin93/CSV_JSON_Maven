@@ -38,12 +38,12 @@ public class Main {
         String[] columnMapping = {"id", "firstName", "lastName", "country", "age"};
         String fileName = "data.csv";
         List<Employee> list = parseCSV(columnMapping, fileName);
-        String json = listToJson(list).toString();
+        String json = listToJson(list);
         String fileNameToJSON = "data.json";
         writeString(json, fileNameToJSON);
 
         List<Employee> list2 = parseXML("data.xml");
-        String json2 = listToJson(list2).toString();
+        String json2 = listToJson(list2);
         String fileNameToJSON2 = "data2.json";
         writeString(json2, fileNameToJSON2);
     }
@@ -117,9 +117,6 @@ public class Main {
 
                 Employee employee = new Employee(id, firstName, lastName, country, age);
                 staff.add(employee);
-                String json = listToJson(staff).toString();
-                String fileNameToJSON = "data2.json";
-                writeString(json, fileNameToJSON);
             }
         }
         return staff;
